@@ -9,6 +9,7 @@ This prediction is crucial to maintaining the customer base and optimizing reten
 ## 📊 Dataset description
 
 The dataset used combines training and test data, containing information about customers such as:
+
 - Demographic characteristics (age, gender)
 - Usage data (usage frequency, support calls)
 - Contractual information (subscription type, contract duration)
@@ -22,17 +23,21 @@ The dataset contains 101,042 entries after cleaning, with a churn distribution o
 ## 📈 Baseline
 
 ### Used features
+
 All available features were used, except for 'CustomerID' because it's not a relevant feature for the prediction.
 
 ### Preprocessing
+
 - Dropping rows with missing values
 - One-hot encoding for categorical variables
 - Standardization of numerical variables
 
 ### Model
+
 The baseline model used is a Logistic Regression, in this case with categorical variables.
 
 ### Metrics obtained
+
 - Accuracy: 0.8460
 - Precision: 0.87 (for the churn class)
 - Recall: 0.85 (for the churn class)
@@ -41,12 +46,15 @@ The baseline model used is a Logistic Regression, in this case with categorical 
 ## 🔄 First Iteration
 
 ### Changes made
+
 We replaced the Logistic Regression with a HistGradientBoostingClassifier.
 
 ### Reasons for the change
+
 The HistGradientBoostingClassifier is capable of capturing complex nonlinear relationships in the data and handles categorical variables well without requiring prior encoding.
 
 ### Impact on metrics
+
 - Accuracy: 0.9361 (9% improvement)
 - Precision: 0.9423 (7% improvement)
 - Recall: 0.9361 (8% improvement)
