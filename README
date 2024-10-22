@@ -13,11 +13,11 @@ The dataset used combines training and test data, containing information about c
 - Usage data (usage frequency, support calls)
 - Contractual information (subscription type, contract duration)
 - Financial behavior (total expenses, payment delays)
-- Engagement client (dernière interaction)
+- Customer engagement (last interaction)
 
 You can have additional information about the dataset in the eda notebook.
 
-The dataset contains 101 042 entries after cleaning, with a churn distribution of approximately 55% (churn) and 45% (non-churn).
+The dataset contains 101,042 entries after cleaning, with a churn distribution of approximately 55% (churn) and 45% (non-churn).
 
 ## 📈 Baseline
 
@@ -30,11 +30,11 @@ All available features were used, except for 'CustomerID' because it's not a rel
 - Standardization of numerical variables
 
 ### Model
-The baseline model used is a Logistic Regression, in your case with have categorical variables.
+The baseline model used is a Logistic Regression, in this case with categorical variables.
 
 ### Metrics obtained
 - Accuracy: 0.8460
-- Precision: 0.87 (pour la classe churn)
+- Precision: 0.87 (for the churn class)
 - Recall: 0.85 (for the churn class)
 - F1-score: 0.86 (for the churn class)
 
@@ -57,23 +57,23 @@ The use of the HistGradientBoostingClassifier has significantly improved all met
 
 ## 🚀 How to start the project
 
-1. Clone the repository :
+1. Clone the repository:
    ```
    git clone [URL_DU_REPO]
    ```
 
-2. Install the dependencies :
+2. Install the dependencies:
    ```
    pip install -r requirements.txt
    ```
 
-3. Launch the Docker containers :
+3. Launch the Docker containers:
    ```
    docker-compose build
    docker-compose up -d
    ```
 
-4. Run the main script :
+4. Run the main script:
    ```
    python script.py
    ```
