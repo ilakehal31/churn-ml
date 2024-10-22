@@ -1,5 +1,8 @@
 import numpy as np
+import mlflow
+import mlflow.sklearn
 import pandas as pd
+from pathlib import Path
 import time
 import optuna
 from sklearn.model_selection import cross_val_score
@@ -17,6 +20,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import make_scorer
 from sklearn.metrics import mean_squared_error
+
+OUTPUT_PATH = Path("./out/score.txt")
 
 # Concat and load the dataset
 df = pd.concat(
@@ -72,7 +77,7 @@ scoring = {
 
 results = []
 
-# Iterate through each models
+# Iterate through each models, DecisionTreeClassifier, RandomForestClassifier, XGBClassifier, HistGradientBoostingClassifier
 def create_models():
     return [
         DecisionTreeClassifier(),
@@ -81,6 +86,7 @@ def create_models():
         HistGradientBoostingClassifier()
     ]
 
+# Function to perform k-fold cross-validation and calculate metrics (Accuracy, Precision, Recall, F1, AUC-ROC)
 def k_fold_cross_validation_with_metrics(model_class, X, y, preprocessor, k_folds=5):
     stratified_kf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=42)
 
@@ -129,6 +135,7 @@ def k_fold_cross_validation_with_metrics(model_class, X, y, preprocessor, k_fold
     }
 
 
+# Perform k-fold cross-validation and calculate metrics for each models
 # for model_class in create_models():
 #     model_name = model_class.__class__.__name__
     
@@ -140,19 +147,13 @@ def k_fold_cross_validation_with_metrics(model_class, X, y, preprocessor, k_fold
 #         'Model': model_name,
 #         **metrics
 #     })
-#     print(f"  Accuracy: {metrics['Test Accuracy']:.4f}")
-#     print(f"  Precision: {metrics['Test Precision']:.4f}")
-#     print(f"  Recall: {metrics['Test Recall']:.4f}")
-#     print(f"  F1: {metrics['Test F1']:.4f}")
-#     print(f"  AUC-ROC: {metrics['Test AUC-ROC']:.4f}")
-#     print()
 
 # results_df = pd.DataFrame(results)
 # results_df = results_df.sort_values('Test Accuracy', ascending=False)
 
 # print(results_df)
 
-# Définition de la fonction objective pour Optuna
+# Find the best hyper-parameters to train the model HistGradientBoostingClassifier
 # def objective(trial):
 #     params = {
 #         'learning_rate': trial.suggest_float('learning_rate', 1e-3, 1.0, log=True),
@@ -174,64 +175,63 @@ def k_fold_cross_validation_with_metrics(model_class, X, y, preprocessor, k_fold
 # study = optuna.create_study(direction='maximize')
 # study.optimize(objective, n_trials=100)
 
-# Meilleurs hyperparamètres trouvés:  {'learning_rate': 0.14086510295122037, 'max_iter': 948, 'max_depth': 10, 'min_samples_leaf': 30, 'max_leaf_nodes': 89, 'l2_regularization': 7.478168083575335e-09}
-# Meilleur score:  0.9360002395646816
+# Best hyper-parameters find:  {'learning_rate': 0.14086510295122037, 'max_iter': 948, 'max_depth': 10, 'min_samples_leaf': 30, 'max_leaf_nodes': 89, 'l2_regularization': 7.478168083575335e-09}
+# Best score:  0.9360002395646816
+
+mlflow.set_tracking_uri("http://mlflow:5000")
+mlflow.set_experiment("Churn Prediction")
+
+# Function to evaluate the model HistGradientBoostingClassifier
+def evaluate_model(model, X, y, preprocessor):
+    metrics = k_fold_cross_validation_with_metrics(model, X, y, preprocessor)
+    return metrics
+
+# Function to write the results in a score file
+def write_results_to_file(base_metrics, output_path):
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w") as f:
+        f.write("Model Results\n")
+        f.write("=============\n\n")
+        f.write("HistGradientBoostingClassifier Results:\n")
+        for metric, value in base_metrics.items():
+            f.write(f"{metric}: {value:.4f}\n")
+
+# Register the run
+with mlflow.start_run(run_name="Base HistGradientBoostingClassifier"):
+    base_model = HistGradientBoostingClassifier(random_state=42)
+    base_metrics = evaluate_model(base_model, X, y, preprocessor)
+    
+    mlflow.log_params(base_model.get_params())
+    for metric_name, metric_value in base_metrics.items():
+        mlflow.log_metric(metric_name, metric_value)
+    mlflow.sklearn.log_model(base_model, "base_model")
+
+    print("\nResults of the base model HistGradientBoostingClassifier:")
+    for metric, value in base_metrics.items():
+        print(f"  {metric}: {value:.4f}")
+
+# Second best model: RandomForestClassifier
+with mlflow.start_run(run_name="Second Best - RandomForestClassifier"):
+    rf_model = RandomForestClassifier(random_state=42)
+    rf_metrics = evaluate_model(rf_model, X, y, preprocessor)
+    
+    mlflow.log_params(rf_model.get_params())
+    for metric_name, metric_value in rf_metrics.items():
+        mlflow.log_metric(metric_name, metric_value)
+    mlflow.sklearn.log_model(rf_model, "random_forest_model")
+
+    print("\nRésultats du RandomForestClassifier:")
+    for metric, value in rf_metrics.items():
+        print(f"  {metric}: {value:.4f}")
+
+# Comparison between the two models
+print("\nComparaison (RandomForest - Base):")
+for metric in base_metrics.keys():
+    diff = rf_metrics[metric] - base_metrics[metric]
+    print(f"  {metric}: {diff:.4f}")
 
 
-base_model = HistGradientBoostingClassifier(random_state=42)
-base_metrics = k_fold_cross_validation_with_metrics(base_model, X, y, preprocessor)
+# Write results to file
+write_results_to_file(base_metrics, OUTPUT_PATH)
 
-print("\nRésultats du modèle de base HistGradientBoostingClassifier:")
-print(f"  Train Accuracy: {base_metrics['Train Accuracy']:.4f}")
-print(f"  Test Accuracy: {base_metrics['Test Accuracy']:.4f}")
-print(f"  Overfitting Gap: {base_metrics['Overfitting Gap']:.4f}")
-
-optimized_params = {
-    'learning_rate': 0.14086510295122037,
-    'max_iter': 948,
-    'max_depth': 10,
-    'min_samples_leaf': 30,
-    'max_leaf_nodes': 89,
-    'l2_regularization': 7.478168083575335e-09
-}
-
-optimized_model = HistGradientBoostingClassifier(**optimized_params, random_state=42)
-
-optimized_metrics = k_fold_cross_validation_with_metrics(optimized_model, X, y, preprocessor)
-
-base_model = HistGradientBoostingClassifier(random_state=42)
-base_metrics = k_fold_cross_validation_with_metrics(base_model, X, y, preprocessor)
-
-# Affichez les résultats pour comparer
-print("\nRésultats du modèle de base HistGradientBoostingClassifier:")
-print(f"  Train Accuracy: {base_metrics['Train Accuracy']:.4f}")
-print(f"  Test Accuracy: {base_metrics['Test Accuracy']:.4f}")
-print(f"  Test Precision: {base_metrics['Test Precision']:.4f}")
-print(f"  Test Recall: {base_metrics['Test Recall']:.4f}")
-print(f"  Test F1: {base_metrics['Test F1']:.4f}")
-print(f"  Test AUC-ROC: {base_metrics['Test AUC-ROC']:.4f}")
-print(f"  Overfitting Gap: {base_metrics['Overfitting Gap']:.4f}")
-
-print("\nRésultats du modèle optimisé HistGradientBoostingClassifier:")
-print(f"  Train Accuracy: {optimized_metrics['Train Accuracy']:.4f}")
-print(f"  Test Accuracy: {optimized_metrics['Test Accuracy']:.4f}")
-print(f"  Test Precision: {optimized_metrics['Test Precision']:.4f}")
-print(f"  Test Recall: {optimized_metrics['Test Recall']:.4f}")
-print(f"  Test F1: {optimized_metrics['Test F1']:.4f}")
-print(f"  Test AUC-ROC: {optimized_metrics['Test AUC-ROC']:.4f}")
-print(f"  Overfitting Gap: {optimized_metrics['Overfitting Gap']:.4f}")
-
-# Calculez et affichez les différences
-print("\nDifférences (Optimisé - Base):")
-print(f"  Train Accuracy: {optimized_metrics['Train Accuracy'] - base_metrics['Train Accuracy']:.4f}")
-print(f"  Test Accuracy: {optimized_metrics['Test Accuracy'] - base_metrics['Test Accuracy']:.4f}")
-print(f"  Test Precision: {optimized_metrics['Test Precision'] - base_metrics['Test Precision']:.4f}")
-print(f"  Test Recall: {optimized_metrics['Test Recall'] - base_metrics['Test Recall']:.4f}")
-print(f"  Test F1: {optimized_metrics['Test F1'] - base_metrics['Test F1']:.4f}")
-print(f"  Test AUC-ROC: {optimized_metrics['Test AUC-ROC'] - base_metrics['Test AUC-ROC']:.4f}")
-print(f"  Overfitting Gap: {optimized_metrics['Overfitting Gap'] - base_metrics['Overfitting Gap']:.4f}")
-
-
-
-
-
+print(f"Results have been written to {OUTPUT_PATH}")

@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/528031902798178520/4f5cd273b7fa4e3fa9afdd20e994d83f/artifacts
+end_time: 1729604637914
+entry_point_name: ''
+experiment_id: '528031902798178520'
+lifecycle_stage: active
+run_id: 4f5cd273b7fa4e3fa9afdd20e994d83f
+run_name: Second Best - RandomForestClassifier
+run_uuid: 4f5cd273b7fa4e3fa9afdd20e994d83f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1729604461983
+status: 3
+tags: []
+user_id: root

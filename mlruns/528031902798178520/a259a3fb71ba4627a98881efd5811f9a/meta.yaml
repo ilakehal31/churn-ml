@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/528031902798178520/a259a3fb71ba4627a98881efd5811f9a/artifacts
+end_time: 1729604461963
+entry_point_name: ''
+experiment_id: '528031902798178520'
+lifecycle_stage: active
+run_id: a259a3fb71ba4627a98881efd5811f9a
+run_name: Base HistGradientBoostingClassifier
+run_uuid: a259a3fb71ba4627a98881efd5811f9a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1729604449215
+status: 3
+tags: []
+user_id: root
