@@ -1,0 +1,10 @@
+ipython
+matplotlib
+numpy
+pandas
+scikit-learn>=1.5.0
+seaborn
+ydata-profiling
+mlflow
+optuna
+xgboost

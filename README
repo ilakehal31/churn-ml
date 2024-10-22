@@ -1,0 +1,43 @@
+Firt one : 
+Accuracy: 0.8460442192355654
+
+Classification Report:
+              precision    recall  f1-score   support
+
+         0.0       0.82      0.84      0.83     44981
+         1.0       0.87      0.85      0.86     56061
+
+    accuracy                           0.85    101042
+   macro avg       0.84      0.85      0.84    101042
+weighted avg       0.85      0.85      0.85    101042
+
+
+
+Some definition :
+
+📊 Key Metrics:
+Accuracy:
+Measures the overall correctness of the model (the percentage of correct predictions).
+Accuracy is not the most important metric in imbalanced datasets, as it can be misleading. For example, predicting the majority class most of the time will give high accuracy but poor performance on the minority class (churners).
+Precision:
+Precision answers the question: Of all the customers predicted to churn, how many actually churned?
+High precision means fewer false positives (customers predicted to churn but actually don’t).
+Recall:
+Recall answers the question: Of all the customers that actually churned, how many did the model correctly identify?
+High recall means fewer false negatives (customers that churn but were predicted not to).
+
+
+1. Performance stable : Les scores de validation croisée sont très cohérents (entre 0.846 et 0.850), ce qui indique une bonne stabilité du modèle.
+Bonne précision globale : La moyenne des scores de validation croisée (0.8485) est très proche de l'accuracy sur l'ensemble de test (0.8460), ce qui confirme la fiabilité de votre modèle.
+Faible écart-type : L'écart-type des scores de validation croisée est très faible (0.00127), indiquant une performance constante sur différents sous-ensembles de données.
+Pas de surapprentissage apparent : La similarité entre les scores de validation croisée et la performance sur l'ensemble de test suggère que le modèle ne souffre pas de surapprentissage significatif.
+
+
+
+Pourquoi utiliser le K-Fold :
+Utilisation efficace des données : Le K-Fold permet d'utiliser toutes les données disponibles pour l'entraînement et la validation, ce qui est particulièrement utile lorsque l'ensemble de données est limité.
+2. Réduction du biais : En utilisant différentes parties des données comme ensemble de validation à chaque pli, on réduit le risque de biais lié à une division spécifique train/test.
+3. Estimation plus robuste : La moyenne des scores sur plusieurs plis donne une estimation plus fiable de la performance du modèle sur des données non vues.
+4. Détection de l'instabilité : Si les scores varient beaucoup entre les plis, cela peut indiquer que le modèle est instable ou que certaines parties des données sont plus difficiles à prédire.
+5. Comparaison de modèles : Le K-Fold fournit une base plus solide pour comparer différents modèles ou configurations d'hyperparamètres.
+6. Évaluation de la généralisation : Il aide à évaluer comment le modèle se comporterait sur de nouvelles données, ce qui est crucial pour des applications réelles.
